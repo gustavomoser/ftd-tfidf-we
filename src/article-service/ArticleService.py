@@ -2,7 +2,7 @@ import scrapy
 from json import dumps
 from os import path, makedirs
 
-class NatureService(scrapy.Spider):
+class ArticleService(scrapy.Spider):
   name = 'naturespider'
   start_urls = ['https://www.nature.com/articles/s41591-020-0843-2']
 
