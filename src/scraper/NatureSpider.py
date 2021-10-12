@@ -1,5 +1,6 @@
 import scrapy
-from json import loads, dumps
+from json import dumps
+from os import path, makedirs
 
 class NatureSpider(scrapy.Spider):
   name = 'naturespider'
@@ -25,7 +26,13 @@ class NatureSpider(scrapy.Spider):
     return dumps(object)
 
   def write_file(self, filename, json):
-    f = open(filename, "w")
+    dir = path.join(path.dirname(__file__), '..', '..', 'files/articles')
+    filepath = path.join(dir, filename)
+
+    if not path.isdir(dir):
+      makedirs(dir, exist_ok=True)
+
+    f = open(filepath, "w")
     f.write(json)
     f.close()
 
