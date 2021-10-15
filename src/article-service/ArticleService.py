@@ -12,14 +12,19 @@ class ArticleService(scrapy.Spider):
       sec = scrapy.Selector(text=s)
       title = sec.xpath('//h2[contains(@class, "c-article-section__title")]/text()').get()
       content = self.clean_section_content(
-        content=sec.xpath('//div[@class="c-article-section__content"]').get()
+        sec.xpath('//div[@class="c-article-section__content"]').get()
       )
       extracted.append({ "section": title, "content": content })
     return extracted
   
-  def clean_section_content(sections, content):
-    # TODO clean non used html content
-    return content
+  def clean_section_content(self, content):
+    sec = scrapy.Selector(text=content)
+    contents = sec.xpath('//p/text()').getall()
+    images = sec.xpath('//img/@src').getall()
+    return ({
+      'text': contents,
+      'images': images
+    })
 
   def create_json(self, object):
     # create object
