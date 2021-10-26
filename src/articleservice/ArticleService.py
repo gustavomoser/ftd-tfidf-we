@@ -5,7 +5,7 @@ from os import path, makedirs
 class ArticleService(scrapy.Spider):
   name = 'naturespider'
   start_urls = ['https://www.nature.com/articles/s41591-020-0843-2']
-
+  used_sections = ['Abstract', 'Main', 'Results', 'Discussion', 'Methods']
 
   def parse(self, response):
     # extract title and create filename
@@ -31,10 +31,11 @@ class ArticleService(scrapy.Spider):
     for s in sections:
       sec = scrapy.Selector(text=s)
       title = sec.xpath('//h2[contains(@class, "c-article-section__title")]/text()').get()
-      content = self.clean_section_content(
-        sec.xpath('//div[@class="c-article-section__content"]').get()
-      )
-      extracted.append({ "section": title, "content": content })
+      if title in self.used_sections:
+        content = self.clean_section_content(
+          sec.xpath('//div[@class="c-article-section__content"]').get()
+        )
+        extracted.append({ "section": title, "content": content })
     return extracted
   
   def clean_section_content(self, content):

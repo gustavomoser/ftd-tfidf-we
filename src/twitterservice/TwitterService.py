@@ -14,13 +14,6 @@ class TwitterService:
     
     result = client.search_recent_tweets(query=query, max_results=100) # max_results=100 tweet_fields=[]
     
-    for tweet in result:
-      self.persist(tweet)
+    tweets = [{ "id": tweet.id, "text": tweet.text } for tweet in result.data]
 
-
-  def persist(self, tweet):
-    # TODO implement mongo interaction
-    print(tweet)
-
-# service = TwitterService()
-# service.extract_tweets(query="covid masks")
+    return tweets
