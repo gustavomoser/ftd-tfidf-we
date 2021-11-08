@@ -12,7 +12,7 @@ class TwitterService:
     
     query = f'{query} -is:retweet'
     
-    result = client.search_recent_tweets(query=query, max_results=100) # max_results=100 tweet_fields=[]
+    result = client.search_recent_tweets(query=query, max_results=100)
     
     tweets = [{ "id": tweet.id, "text": tweet.text } for tweet in result.data]
 

@@ -4,8 +4,16 @@ from os import path, makedirs
 
 class ArticleService(scrapy.Spider):
   name = 'naturespider'
-  start_urls = ['https://www.nature.com/articles/s41591-020-0843-2']
-  used_sections = ['Abstract', 'Main', 'Results', 'Discussion', 'Methods']
+
+  articles_url = []
+
+  with open(path.join(path.dirname(__file__), '..', '..', 'articles.txt'), 'r') as file:
+    lines = file.readlines()
+    for line in lines:
+      articles_url.append(line)
+
+  start_urls = articles_url
+  used_sections = ['Abstract', 'Main', 'Results', 'Discussion', 'Methods', 'Conclusions']
 
   def parse(self, response):
     # extract title and create filename
@@ -62,8 +70,3 @@ class ArticleService(scrapy.Spider):
     f = open(filepath, "w")
     f.write(json)
     f.close()
-
-  
-  def persist(self, tweet):
-    # TODO implement mongo interaction
-    print(tweet)

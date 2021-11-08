@@ -1,6 +1,7 @@
 import argparse
 from os import listdir, path
 from json import load
+from time import sleep
 
 from scrapy.crawler import CrawlerProcess
 from articleservice.ArticleService import ArticleService
@@ -39,11 +40,12 @@ def saveArticles():
 def getArticles():
   return service.getArticles()
 
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('process', help='type of process that you may execute')
     args = parser.parse_args()
     if args.process == 'savetweets':
-        saveTweets()
+       saveTweets()
     if args.process == 'savearticles':
-        saveArticles()
+      saveArticles()
