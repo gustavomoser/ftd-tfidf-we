@@ -5,18 +5,15 @@ from time import sleep
 
 from scrapy.crawler import CrawlerProcess
 from articleservice.ArticleService import ArticleService
-from mongoservice.MongoService import MongoService
+from service.Service import Service
 from twitterservice.TwitterService import TwitterService
 
-service = MongoService()
+service = Service()
 path_to_json = path.join(path.dirname(__file__), '..', 'files', 'articles')
 
 def saveTweets():
   tweets = TwitterService().extract_tweets('covid masks')
   service.saveTweets(tweets)
-
-def getTweets():
-  return service.getTweets()
 
 def __crawlArticles():
   process = CrawlerProcess()
@@ -32,13 +29,11 @@ def __loadArticles(files):
   return jsons
 
 def saveArticles():
-  __crawlArticles()
+  # __crawlArticles()
   files = [pos_json for pos_json in listdir(path_to_json)]
   loaded_files = __loadArticles(files)
   service.saveArticles(loaded_files)
 
-def getArticles():
-  return service.getArticles()
 
 
 if __name__ == '__main__':

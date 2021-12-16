@@ -48,12 +48,8 @@ class ArticleService(scrapy.Spider):
   
   def clean_section_content(self, content):
     sec = scrapy.Selector(text=content)
-    contents = sec.xpath('//p/text()').getall()
-    images = sec.xpath('//img/@src').getall()
-    return ({
-      'text': contents,
-      'images': images
-    })
+    contents = ','.join(sec.xpath('//p/text()').getall())
+    return contents
 
   def create_json(self, object):
     # create object
