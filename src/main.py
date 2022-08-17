@@ -28,8 +28,11 @@ def __loadArticles(files):
         jsons.append(json_text)
   return jsons
 
+def cleanTweets():
+  service.cleanTweets()
+
 def saveArticles():
-  # __crawlArticles()
+  __crawlArticles()
   files = [pos_json for pos_json in listdir(path_to_json)]
   loaded_files = __loadArticles(files)
   service.saveArticles(loaded_files)
@@ -41,6 +44,9 @@ if __name__ == '__main__':
     parser.add_argument('process', help='type of process that you may execute')
     args = parser.parse_args()
     if args.process == 'savetweets':
-       saveTweets()
+      saveTweets()
+    if args.process == 'cleantweets':
+      cleanTweets()
     if args.process == 'savearticles':
       saveArticles()
+    
