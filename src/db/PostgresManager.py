@@ -1,4 +1,5 @@
 import psycopg2
+from psycopg2.extras import execute_batch
 from dotenv import load_dotenv
 from os import path, environ
 
@@ -76,3 +77,32 @@ class PostgresManager:
         self.__closeCursor()
         self.__closeConn()
     return rs
+
+  def fetchAll(self, sql):
+    try:
+      self.__connect()
+      cursor = self.__cursor()
+      cursor.execute(sql)
+      rs = cursor.fetchall()
+    except (Exception, psycopg2.DatabaseError) as error:
+      print(error)
+    finally:
+      if self.__conn is not None:
+        self.__closeCursor()
+        self.__closeConn()
+    return rs
+
+  def update(self, update, pair, tweets):
+    try:
+      self.__connect()
+      cursor = self.__cursor()
+      cursor.execute("PREPARE updateStmt AS " + update)
+      execute_batch(cursor, "EXECUTE updateStmt " + pair, tweets, 100)
+      cursor.execute("DEALLOCATE updateStmt")
+      self.__commit()
+    except (Exception, psycopg2.DatabaseError) as error:
+      print(error)
+    finally:
+      if self.__conn is not None:
+        self.__closeCursor()
+        self.__closeConn()
