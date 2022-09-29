@@ -1,6 +1,7 @@
-import scrapy
 from json import dumps
-from os import path, makedirs
+from os import makedirs, path
+
+import scrapy
 
 
 class ArticleService(scrapy.Spider):

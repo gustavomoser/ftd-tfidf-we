@@ -1,7 +1,8 @@
-from os import listdir, path
 from json import load
+from os import listdir, path
 
 from scrapy.crawler import CrawlerProcess
+
 from articleservice.ArticleService import ArticleService
 from service.Service import Service
 
