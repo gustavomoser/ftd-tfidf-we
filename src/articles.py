@@ -30,3 +30,7 @@ def saveArticles():
     files = [pos_json for pos_json in listdir(path_to_json)]
     loaded_files = __loadArticles(files)
     service.saveArticles(loaded_files)
+
+
+def tfidf():
+    service.generateTFIDF()

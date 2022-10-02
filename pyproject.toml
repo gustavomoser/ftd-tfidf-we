@@ -19,9 +19,11 @@ python-dotenv = "^0.20.0"
 emoji-translate = "^0.1.1"
 regex = "^2022.9.13"
 spacy = "^3.4.1"
+nltk = "^3.7"
 
 [tool.poetry.scripts]
 save_articles = "src.articles:saveArticles"
+tfidf = "src.articles:tfidf"
 save_tweets = "src.tweets:saveTweets"
 clean_tweets = "src.tweets:cleanTweets"
 

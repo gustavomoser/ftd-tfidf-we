@@ -1,5 +1,12 @@
+import math
+import re
+
+import nltk
 from db.PostgresManager import PostgresManager
 from util import clean
+
+#  NLTK built-in support for dozens of corpora and trained models
+nltk.download("punkt", quiet=True)
 
 
 class Service:
@@ -68,3 +75,99 @@ class Service:
                     + sections
                     + ";"
                 )
+
+    def getArticleSections(self):
+        pm = PostgresManager()
+        rs = pm.fetchAll("SELECT id, content FROM article_section")
+
+        res = {}
+        for result in rs:
+            id = result[0]
+            content = result[1]
+            if id not in res:
+                res[id] = content
+            else:
+                res.update({id: res[id] + " " + content})
+
+        return res
+
+    def __createVocabulary(self, sections):
+        vocabulary = []
+
+        for section in sections.values():
+            lower = section.lower()
+            only_letters = re.findall(r"[a-z]+", lower)
+            new_section = " ".join(only_letters)
+            tokens = nltk.word_tokenize(new_section)
+
+            for token in tokens:
+                if token not in vocabulary:
+                    vocabulary.append(token)
+        return vocabulary
+
+    def __dictCount(self, vocabulary, section):
+        dictCount = dict.fromkeys(vocabulary, 0)
+        for word in section:
+            dictCount[word] += 1
+        return dictCount
+
+    def __TF(self, dictCount, sectionTokens):
+        tfDict = {}
+        sectionWordCount = len(sectionTokens)
+
+        for word, count in dictCount.items():
+            tfDict[word] = count / float(sectionWordCount)
+
+        return tfDict
+
+    def __IDF(self, sections):
+        idfDict = {}
+        N = len(sections)
+
+        for word in sections[0]:
+            apparisionCount = 0
+            for section in sections:
+                if section[word] > 0:
+                    apparisionCount += 1
+
+            idfDict[word] = math.log10(N / apparisionCount)
+
+        return idfDict
+
+    def __TFIDF(self, tf_bow, idfs):
+        tfidf = {}
+
+        for word in tf_bow:
+            tf = tf_bow[word]
+            idf = idfs[word]
+            tfidf[word] = tf * idf
+
+        return tfidf
+
+    def generateTFIDF(self):
+        sections = self.getArticleSections()
+        # PREPROCESSING?
+        vocabulary: list[str] = self.__createVocabulary(sections)
+
+        dictCount = {}
+        tf_bows = {}
+        tfidfs = {}
+
+        for id, section in sections.items():
+            lower = section.lower()
+            only_letters = re.findall(r"[a-z]+", lower)
+            new_section = " ".join(only_letters)
+            tokens = nltk.word_tokenize(new_section)
+
+            sectionDictCount = self.__dictCount(vocabulary, tokens)
+            dictCount[id] = sectionDictCount
+
+            tf = self.__TF(sectionDictCount, tokens)
+            tf_bows[id] = tf
+
+        idf = self.__IDF(list(dictCount.values()))
+
+        for j in sections.keys():
+            tfidfs[j] = self.__TFIDF(tf_bows[j], idf)
+
+        print(tfidfs)
