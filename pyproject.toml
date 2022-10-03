@@ -4,10 +4,10 @@ version = "0.1.0"
 description = ""
 authors = ["Gustavo Moser <gustavovbmoser@gmail.com>"]
 packages = [
-    { include = "articleservice", from = "src" },
+    { include = "article", from = "src" },
     { include = "db", from = "src" },
     { include = "service", from = "src" },
-    { include = "twitterservice", from = "src" },
+    { include = "twitter", from = "src" },
 ]
 
 [tool.poetry.dependencies]

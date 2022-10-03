@@ -4,7 +4,7 @@ from os import makedirs, path
 import scrapy
 
 
-class ArticleService(scrapy.Spider):
+class ArticleScraper(scrapy.Spider):
     name = "naturespider"
 
     articles_url = []

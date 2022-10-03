@@ -3,7 +3,7 @@ from os import listdir, path
 
 from scrapy.crawler import CrawlerProcess
 
-from articleservice.ArticleService import ArticleService
+from article.ArticleScraper import ArticleScraper
 from service.Service import Service
 
 service = Service()
@@ -12,7 +12,7 @@ path_to_json = path.join(path.dirname(__file__), "..", "assets", "articles")
 
 def __crawlArticles():
     process = CrawlerProcess()
-    process.crawl(ArticleService)
+    process.crawl(ArticleScraper)
     process.start()
 
 
@@ -33,4 +33,4 @@ def saveArticles():
 
 
 def tfidf():
-    service.generateTFIDF()
+    service.articlesTFIDF()

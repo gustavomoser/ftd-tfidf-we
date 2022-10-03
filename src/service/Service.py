@@ -91,18 +91,21 @@ class Service:
 
         return res
 
-    def __createVocabulary(self, sections):
+    def __createVocabulary(self, text: str, vocabulary: list[str]):
+        lower = text.lower()
+        only_letters = re.findall(r"[a-z]+", lower)
+        new_section = " ".join(only_letters)
+        tokens = nltk.word_tokenize(new_section)
+
+        for token in tokens:
+            if token not in vocabulary:
+                vocabulary.append(token)
+
+    def __createArticleVocabulary(self, sections):
         vocabulary = []
 
         for section in sections.values():
-            lower = section.lower()
-            only_letters = re.findall(r"[a-z]+", lower)
-            new_section = " ".join(only_letters)
-            tokens = nltk.word_tokenize(new_section)
-
-            for token in tokens:
-                if token not in vocabulary:
-                    vocabulary.append(token)
+            self.__createVocabulary(section, vocabulary)
         return vocabulary
 
     def __dictCount(self, vocabulary, section):
@@ -144,10 +147,10 @@ class Service:
 
         return tfidf
 
-    def generateTFIDF(self):
+    def articlesTFIDF(self):
         sections = self.getArticleSections()
         # PREPROCESSING?
-        vocabulary: list[str] = self.__createVocabulary(sections)
+        vocabulary: list[str] = self.__createArticleVocabulary(sections)
 
         dictCount = {}
         tf_bows = {}

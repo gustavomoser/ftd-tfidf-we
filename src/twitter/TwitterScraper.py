@@ -4,7 +4,7 @@ import tweepy
 from dotenv import load_dotenv
 
 
-class TwitterService:
+class TwitterScraper:
     def extract_tweets(self, query):
         load_dotenv(dotenv_path=path.join(path.dirname(__file__), "..", "..", ".env"))
 
