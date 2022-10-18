@@ -1,15 +1,21 @@
-import math
 import re
+from json import dumps
+from os import makedirs, path
 
 import nltk
 from db.PostgresManager import PostgresManager
+from nltk.corpus import stopwords
+from nltk.stem import PorterStemmer
 from util import clean
 
 #  NLTK built-in support for dozens of corpora and trained models
 nltk.download("punkt", quiet=True)
+nltk.download("stopwords", quiet=True)
 
 
 class Service:
+    ps = PorterStemmer()
+
     def saveTweets(self, tweets):
         pm = PostgresManager()
         insert = ",".join(
@@ -91,86 +97,74 @@ class Service:
 
         return res
 
-    def __createVocabulary(self, text: str, vocabulary: list[str]):
-        lower = text.lower()
-        only_letters = re.findall(r"[a-z]+", lower)
-        new_section = " ".join(only_letters)
-        tokens = nltk.word_tokenize(new_section)
+    def getTweets(self):
+        pm = PostgresManager()
+        rs = pm.fetchAll("SELECT * FROM tweet_clean")
 
-        for token in tokens:
-            if token not in vocabulary:
-                vocabulary.append(token)
+        res = {}
+        for result in rs:
+            id = result[0]
+            content = result[1]
+            res.update({id: content})
 
-    def __createArticleVocabulary(self, sections):
-        vocabulary = []
+        return res
 
-        for section in sections.values():
-            self.__createVocabulary(section, vocabulary)
-        return vocabulary
+    def __textToStemTokens(self, text: str) -> list[str]:
+        tokens = nltk.word_tokenize(text)
+        stem = []
+        for word in tokens:
+            if (
+                re.fullmatch(r"[a-z]+", word)
+                and word not in stopwords.words("english")
+                and len(word) > 1
+            ):
+                stem.append(self.ps.stem(word))
+        return stem
 
-    def __dictCount(self, vocabulary, section):
-        dictCount = dict.fromkeys(vocabulary, 0)
-        for word in section:
-            dictCount[word] += 1
-        return dictCount
+    def export(self):
+        self.exportFullArticleContentToJson()
+        self.exportCleanWordsToJson()
+        self.exportFullTweetsToJson()
+        self.exportCleanTweetsToJson()
 
-    def __TF(self, dictCount, sectionTokens):
-        tfDict = {}
-        sectionWordCount = len(sectionTokens)
+    def exportFullTweetsToJson(self):
+        self.writeJsonFile(self.getTweets(), "tweet_full.json")
 
-        for word, count in dictCount.items():
-            tfDict[word] = count / float(sectionWordCount)
+    def exportCleanTweetsToJson(self):
+        export = {}
 
-        return tfDict
+        tweets = self.getTweets()
+        for id, tweet in tweets.items():
+            root = self.__textToStemTokens(tweet)
+            export.update({id: root})
 
-    def __IDF(self, sections):
-        idfDict = {}
-        N = len(sections)
+        self.writeJsonFile(export, "tweet_root_words.json")
 
-        for word in sections[0]:
-            apparisionCount = 0
-            for section in sections:
-                if section[word] > 0:
-                    apparisionCount += 1
+    def exportFullArticleContentToJson(self):
+        self.writeJsonFile(self.getArticleSections(), "article_full_section.json")
 
-            idfDict[word] = math.log10(N / apparisionCount)
+    def exportCleanWordsToJson(self):
+        export = {}
 
-        return idfDict
-
-    def __TFIDF(self, tf_bow, idfs):
-        tfidf = {}
-
-        for word in tf_bow:
-            tf = tf_bow[word]
-            idf = idfs[word]
-            tfidf[word] = tf * idf
-
-        return tfidf
-
-    def articlesTFIDF(self):
         sections = self.getArticleSections()
-        # PREPROCESSING?
-        vocabulary: list[str] = self.__createArticleVocabulary(sections)
-
-        dictCount = {}
-        tf_bows = {}
-        tfidfs = {}
-
         for id, section in sections.items():
-            lower = section.lower()
-            only_letters = re.findall(r"[a-z]+", lower)
-            new_section = " ".join(only_letters)
-            tokens = nltk.word_tokenize(new_section)
+            tokens = self.__textToStemTokens(section)
+            export.update({id: tokens})
 
-            sectionDictCount = self.__dictCount(vocabulary, tokens)
-            dictCount[id] = sectionDictCount
+        self.writeJsonFile(export, "article_root_words.json")
 
-            tf = self.__TF(sectionDictCount, tokens)
-            tf_bows[id] = tf
+    def writeJsonFile(self, obj: object, filename: str):
+        if not obj or not filename:
+            return
 
-        idf = self.__IDF(list(dictCount.values()))
+        json = dumps(obj)
 
-        for j in sections.keys():
-            tfidfs[j] = self.__TFIDF(tf_bows[j], idf)
+        directory = path.join(path.dirname(__file__), "..", "..", "assets/json")
+        filepath = path.join(directory, filename)
 
-        print(tfidfs)
+        if not path.isdir(directory):
+            makedirs(directory, exist_ok=True)
+
+        f = open(filepath, "w")
+        f.write(json)
+        f.close()

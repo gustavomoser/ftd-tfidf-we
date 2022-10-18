@@ -23,7 +23,7 @@ nltk = "^3.7"
 
 [tool.poetry.scripts]
 save_articles = "src.articles:saveArticles"
-tfidf = "src.articles:tfidf"
+export_jsons = "src.common:export"
 save_tweets = "src.tweets:saveTweets"
 clean_tweets = "src.tweets:cleanTweets"
 
