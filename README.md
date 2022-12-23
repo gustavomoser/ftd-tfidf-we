@@ -1,3 +1,4 @@
-# Detecção de tweets falsos - Uma análise sobre TF-IDF e Sentence Transformers
+# ANÁLISE DE SIMILARIDADE ENTRE TF-IDF E MODELOS CONTEXTUALIZADOS
+DE LINGUAGEM BASEADOS EM TOKENS
 
 Projeto resultante do desenvolvimento do Trabalho de Conclusão de Curso em Ciência da Computação.
